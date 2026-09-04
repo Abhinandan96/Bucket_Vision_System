@@ -5,10 +5,12 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-<title>Berger Bucket Vision System</title>
+<title>BERGER BUCKET VISION</title>
 
 <style>
 
@@ -20,102 +22,78 @@ body {
 
     margin: 0;
 
-    font-family: Arial, sans-serif;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 
-    background: #f2f4f7;
+    background: #f1f3f6;
 
-    color: #17202a;
+    color: #172033;
 }
-
 
 .container {
 
-    max-width: 700px;
+    width: 100%;
+
+    max-width: 850px;
 
     margin: auto;
 
     padding: 15px;
 }
 
-
-.header {
-
-    background: white;
-
-    padding: 20px;
-
-    border-radius: 15px;
-
-    margin-bottom: 15px;
-
-    text-align: center;
-
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-
-.header h1 {
-
-    margin: 0;
-
-    font-size: 25px;
-
-}
-
-
-.header p {
-
-    margin-bottom: 0;
-
-    color: #667085;
-
-}
-
-
 .card {
 
     background: white;
 
-    padding: 18px;
+    border-radius: 18px;
 
-    border-radius: 15px;
+    padding: 20px;
 
-    margin-bottom: 15px;
+    margin-bottom: 18px;
 
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow:
+        0 3px 12px
+        rgba(0,0,0,0.08);
 }
 
-
-.card h2 {
+h2 {
 
     margin-top: 0;
 
-    font-size: 18px;
-
+    font-size: 23px;
 }
 
+label {
+
+    display: block;
+
+    font-weight: bold;
+
+    margin-bottom: 10px;
+}
 
 select {
 
     width: 100%;
 
-    padding: 13px;
+    padding: 15px;
+
+    font-size: 17px;
 
     border-radius: 10px;
 
     border: 1px solid #bbb;
 
-    font-size: 16px;
-
     background: white;
 }
 
-
 button {
 
-    width: 100%;
+    width: 49%;
 
-    padding: 14px;
+    padding: 15px 10px;
 
     border: none;
 
@@ -128,148 +106,150 @@ button {
     cursor: pointer;
 }
 
+#startButton {
 
-.start {
-
-    background: #1769e0;
+    background: #1976d2;
 
     color: white;
 }
 
+#stopButton {
 
-.stop {
+    background: #e1e4e9;
 
-    background: #e4e7ec;
-
-    color: #344054;
+    color: #263246;
 }
 
+.camera-area {
 
-.buttons {
+    margin-top: 15px;
 
-    display: grid;
+    width: 100%;
 
-    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
 
-    gap: 10px;
+    border-radius: 15px;
 
-    margin-bottom: 10px;
+    background: black;
 }
-
 
 video {
 
     width: 100%;
 
-    aspect-ratio: 4 / 3;
+    display: block;
+
+    max-height: 600px;
 
     object-fit: cover;
-
-    background: black;
-
-    border-radius: 12px;
-
 }
 
+#cameraMessage {
 
-.status {
+    text-align: center;
 
     margin-top: 10px;
 
-    font-size: 14px;
+    color: #657083;
 
-    color: #667085;
-
-    text-align: center;
+    font-size: 16px;
 }
 
+.decision {
 
-.result {
+    width: 100%;
 
-    text-align: center;
-
-    padding: 25px;
+    padding: 28px 10px;
 
     border-radius: 15px;
 
-    font-size: 30px;
+    text-align: center;
+
+    font-size: 32px;
 
     font-weight: bold;
 }
 
-
 .waiting {
 
-    background: #eef1f4;
+    background: #edf0f3;
 
-    color: #475467;
+    color: #536176;
 }
-
 
 .correct {
 
-    background: #dff6e5;
+    background: #dff5e4;
 
-    color: #137333;
+    color: #16803a;
 }
-
 
 .rejected {
 
-    background: #fde7e7;
+    background: #fde3e3;
 
     color: #b42318;
 }
 
-
 .stats {
 
-    display: grid;
+    display: flex;
 
-    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
 
-    gap: 8px;
-
-    margin-top: 12px;
+    margin-top: 15px;
 }
-
 
 .stat {
 
-    background: #f7f8fa;
+    flex: 1;
 
-    padding: 12px;
+    background: #f6f7f9;
+
+    border-radius: 12px;
+
+    padding: 15px 5px;
 
     text-align: center;
-
-    border-radius: 10px;
 }
 
+.stat-value {
 
-.stat strong {
+    font-size: 23px;
 
-    display: block;
-
-    font-size: 19px;
+    font-weight: bold;
 }
 
+.stat-label {
 
-.stat span {
+    font-size: 12px;
 
-    font-size: 11px;
+    color: #687386;
 
-    color: #667085;
+    margin-top: 5px;
 }
 
+@media(max-width:600px) {
 
-@media(max-width:500px) {
+    .container {
 
-    .buttons {
-
-        grid-template-columns: 1fr;
-
+        padding: 10px;
     }
 
+    .card {
+
+        padding: 15px;
+    }
+
+    button {
+
+        font-size: 14px;
+    }
+
+    .decision {
+
+        font-size: 28px;
+    }
 }
 
 </style>
@@ -279,42 +259,23 @@ video {
 
 <body>
 
-
 <div class="container">
 
 
-<!-- HEADER -->
-
-<div class="header">
-
-<h1>
-BERGER BUCKET VISION
-</h1>
-
-<p>
-Machine Vision Based Bucket Identification
-</p>
-
-</div>
-
-
-<!-- EXPECTED PRODUCT -->
+<!-- =====================================================
+     EXPECTED BUCKET
+====================================================== -->
 
 <div class="card">
 
-<h2>
-1. Select Expected Bucket
-</h2>
-
+<h2>1. Select Expected Bucket</h2>
 
 <select id="expectedBucket">
 
-{% for reference in references %}
+{% for item in references %}
 
-<option value="{{ reference.filename }}">
-
-{{ reference.label }}
-
+<option value="{{ item.filename }}">
+    {{ item.label }}
 </option>
 
 {% endfor %}
@@ -324,74 +285,68 @@ Machine Vision Based Bucket Identification
 </div>
 
 
-<!-- CAMERA -->
+<!-- =====================================================
+     CAMERA
+====================================================== -->
 
 <div class="card">
 
-<h2>
-2. Camera Inspection
-</h2>
+<h2>2. Camera Inspection</h2>
 
-
-<div class="buttons">
-
+<div>
 
 <button
-    class="start"
-    id="startCamera">
-
-START REAR CAMERA
-
+    id="startButton"
+    onclick="startCamera()"
+>
+    START REAR CAMERA
 </button>
-
 
 <button
-    class="stop"
-    id="stopCamera"
-    disabled>
-
-STOP CAMERA
-
+    id="stopButton"
+    onclick="stopCamera()"
+>
+    STOP CAMERA
 </button>
-
 
 </div>
 
+
+<div class="camera-area">
 
 <video
-    id="camera"
+    id="video"
     autoplay
     playsinline
-    muted>
+    muted
+>
 </video>
 
+</div>
 
-<div
-    class="status"
-    id="cameraStatus">
 
-Camera is stopped.
+<div id="cameraMessage">
+
+Camera stopped
 
 </div>
 
 </div>
 
 
-<!-- RESULT -->
+<!-- =====================================================
+     DECISION
+====================================================== -->
 
 <div class="card">
 
-<h2>
-3. Vision Decision
-</h2>
-
+<h2>3. Vision Decision</h2>
 
 <div
     id="decision"
-    class="result waiting">
-
-WAITING
-
+    class="decision waiting"
+>
+    WAITING
 </div>
 
 
@@ -400,39 +355,48 @@ WAITING
 
 <div class="stat">
 
-<strong id="score">
-—
-</strong>
+<div
+    id="score"
+    class="stat-value"
+>
+    —
+</div>
 
-<span>
-MATCH SCORE
-</span>
+<div class="stat-label">
+    MATCH SCORE
+</div>
 
 </div>
 
 
 <div class="stat">
 
-<strong id="goodMatches">
-—
-</strong>
+<div
+    id="matches"
+    class="stat-value"
+>
+    —
+</div>
 
-<span>
-GOOD MATCHES
-</span>
+<div class="stat-label">
+    GOOD MATCHES
+</div>
 
 </div>
 
 
 <div class="stat">
 
-<strong id="inliers">
-—
-</strong>
+<div
+    id="inliers"
+    class="stat-value"
+>
+    —
+</div>
 
-<span>
-INLIERS
-</span>
+<div class="stat-label">
+    INLIERS
+</div>
 
 </div>
 
@@ -441,365 +405,241 @@ INLIERS
 
 </div>
 
-
 </div>
+
+
+<!-- =====================================================
+     HIDDEN CANVAS
+====================================================== -->
+
+<canvas
+    id="canvas"
+    style="display:none;"
+></canvas>
 
 
 <script>
 
+let video =
+    document.getElementById("video");
 
-const camera =
-    document.getElementById(
-        "camera"
-    );
+let canvas =
+    document.getElementById("canvas");
 
+let stream = null;
 
-const expectedBucket =
-    document.getElementById(
-        "expectedBucket"
-    );
+let checking = false;
 
+let timer = null;
 
-const startButton =
-    document.getElementById(
-        "startCamera"
-    );
 
+/* =====================================================
+   START CAMERA
+===================================================== */
 
-const stopButton =
-    document.getElementById(
-        "stopCamera"
-    );
-
-
-const cameraStatus =
-    document.getElementById(
-        "cameraStatus"
-    );
-
-
-const decision =
-    document.getElementById(
-        "decision"
-    );
-
-
-const score =
-    document.getElementById(
-        "score"
-    );
-
-
-const goodMatches =
-    document.getElementById(
-        "goodMatches"
-    );
-
-
-const inliers =
-    document.getElementById(
-        "inliers"
-    );
-
-
-let cameraStream = null;
-
-let checkTimer = null;
-
-let processing = false;
-
-
-
-// ============================================
-// RESULT DISPLAY
-// ============================================
-
-function displayResult(
-    type,
-    message
-) {
-
-    decision.className =
-        "result " + type;
-
-    decision.textContent =
-        message;
-
-}
-
-
-
-// ============================================
-// START CAMERA
-// ============================================
-
-startButton.addEventListener(
-    "click",
-    async function()
-    {
-
-        try {
-
-            cameraStream =
-                await navigator.mediaDevices
-                .getUserMedia({
-
-                    video: {
-
-                        facingMode: {
-                            ideal: "environment"
-                        },
-
-                        width: {
-                            ideal: 1280
-                        },
-
-                        height: {
-                            ideal: 720
-                        }
-
-                    },
-
-                    audio: false
-
-                });
-
-
-            camera.srcObject =
-                cameraStream;
-
-
-            startButton.disabled =
-                true;
-
-
-            stopButton.disabled =
-                false;
-
-
-            cameraStatus.textContent =
-                "Rear camera active. Place one bucket in front of the camera.";
-
-
-            displayResult(
-                "waiting",
-                "WAITING"
-            );
-
-
-            checkTimer =
-                setInterval(
-                    analyzeCamera,
-                    1000
-                );
-
-        }
-
-        catch(error) {
-
-            cameraStatus.textContent =
-                "Camera error: " +
-                error.message;
-
-
-            displayResult(
-                "rejected",
-                "CAMERA ERROR"
-            );
-
-        }
-
-    }
-);
-
-
-
-// ============================================
-// STOP CAMERA
-// ============================================
-
-stopButton.addEventListener(
-    "click",
-    stopCamera
-);
-
-
-function stopCamera()
-{
-
-    if(checkTimer) {
-
-        clearInterval(
-            checkTimer
-        );
-
-        checkTimer = null;
-
-    }
-
-
-    if(cameraStream) {
-
-        cameraStream
-        .getTracks()
-        .forEach(
-            track =>
-                track.stop()
-        );
-
-    }
-
-
-    cameraStream = null;
-
-    camera.srcObject = null;
-
-
-    startButton.disabled =
-        false;
-
-
-    stopButton.disabled =
-        true;
-
-
-    cameraStatus.textContent =
-        "Camera is stopped.";
-
-
-    displayResult(
-        "waiting",
-        "WAITING"
-    );
-
-}
-
-
-
-// ============================================
-// CAPTURE CAMERA FRAME
-// ============================================
-
-async function analyzeCamera()
-{
-
-    if(
-        processing ||
-        !cameraStream ||
-        camera.readyState < 2
-    ) {
-
-        return;
-
-    }
-
-
-    processing = true;
-
+async function startCamera() {
 
     try {
 
-        const width =
-            Math.min(
-                camera.videoWidth || 1280,
-                1280
-            );
+        stream =
+            await navigator.mediaDevices.getUserMedia({
+
+                video: {
+
+                    facingMode: {
+                        ideal: "environment"
+                    },
+
+                    width: {
+                        ideal: 1280
+                    },
+
+                    height: {
+                        ideal: 720
+                    }
+                },
+
+                audio: false
+
+            });
+
+        video.srcObject = stream;
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
+            "Camera active";
+
+        startInspection();
+
+    }
+
+    catch(error) {
+
+        console.error(error);
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
+            "Camera access failed: "
+            + error.message;
+    }
+}
 
 
-        const height =
-            Math.round(
+/* =====================================================
+   STOP CAMERA
+===================================================== */
 
-                width *
+function stopCamera() {
 
-                (camera.videoHeight || 720)
+    if (stream) {
 
-                /
+        stream.getTracks().forEach(
+            track => track.stop()
+        );
 
-                (camera.videoWidth || 1280)
+        stream = null;
+    }
 
-            );
+    if (timer) {
+
+        clearInterval(timer);
+
+        timer = null;
+    }
+
+    checking = false;
+
+    video.srcObject = null;
+
+    document.getElementById(
+        "cameraMessage"
+    ).innerText =
+        "Camera stopped";
+
+    setWaiting();
+}
 
 
-        const canvas =
-            document.createElement(
-                "canvas"
-            );
+/* =====================================================
+   START INSPECTION
+===================================================== */
 
+function startInspection() {
+
+    if (timer) {
+
+        clearInterval(timer);
+    }
+
+    timer = setInterval(
+        captureAndCheck,
+        1200
+    );
+}
+
+
+/* =====================================================
+   CAPTURE CAMERA IMAGE
+===================================================== */
+
+async function captureAndCheck() {
+
+    if (!stream) {
+        return;
+    }
+
+    if (checking) {
+        return;
+    }
+
+    if (
+        video.videoWidth === 0 ||
+        video.videoHeight === 0
+    ) {
+
+        return;
+    }
+
+    checking = true;
+
+    try {
 
         canvas.width =
-            width;
-
+            video.videoWidth;
 
         canvas.height =
-            height;
+            video.videoHeight;
 
-
-        const context =
-            canvas.getContext(
-                "2d"
-            );
-
+        let context =
+            canvas.getContext("2d");
 
         context.drawImage(
-
-            camera,
-
+            video,
             0,
-
             0,
-
-            width,
-
-            height
-
+            canvas.width,
+            canvas.height
         );
 
 
-        const imageBlob =
+        /*
+         * IMPORTANT:
+         *
+         * Convert canvas directly
+         * into a JPEG Blob.
+         *
+         * We are NOT using Base64.
+         */
+
+        const blob =
             await new Promise(
                 resolve =>
-
                     canvas.toBlob(
-
                         resolve,
-
                         "image/jpeg",
-
-                        0.85
-
+                        0.80
                     )
             );
 
 
+        if (!blob) {
+
+            throw new Error(
+                "Could not create camera image"
+            );
+        }
+
+
+        /* ---------------------------------------------
+           Create multipart form
+        --------------------------------------------- */
+
         const formData =
             new FormData();
 
-
         formData.append(
-
             "expected",
-
-            expectedBucket.value
-
+            document.getElementById(
+                "expectedBucket"
+            ).value
         );
-
 
         formData.append(
-
             "frame",
-
-            imageBlob,
-
+            blob,
             "camera.jpg"
-
         );
 
+
+        /* ---------------------------------------------
+           Send to Flask
+        --------------------------------------------- */
 
         const response =
             await fetch(
-
                 "/api/check",
-
                 {
 
                     method: "POST",
@@ -807,7 +647,6 @@ async function analyzeCamera()
                     body: formData
 
                 }
-
             );
 
 
@@ -815,108 +654,148 @@ async function analyzeCamera()
             await response.json();
 
 
-        if(!response.ok) {
+        if (!response.ok) {
 
             throw new Error(
                 data.error ||
-                "Vision processing error"
+                "Server error"
             );
-
         }
 
 
-        // Display statistics
-
-        score.textContent =
-            data.score + "%";
-
-
-        goodMatches.textContent =
-            data.good_matches;
-
-
-        inliers.textContent =
-            data.inliers;
-
-
-
-        // ====================================
-        // CORRECT BUCKET
-        // ====================================
-
-        if(data.match) {
-
-            displayResult(
-
-                "correct",
-
-                "✓ CORRECT"
-
-            );
-
-
-            cameraStatus.textContent =
-
-                "Bucket matches: " +
-
-                data.expected;
-
-        }
-
-
-
-        // ====================================
-        // WRONG BUCKET
-        // ====================================
-
-        else {
-
-            displayResult(
-
-                "rejected",
-
-                "✕ REJECTED"
-
-            );
-
-
-            cameraStatus.textContent =
-
-                "Wrong bucket. Expected: " +
-
-                data.expected;
-
-        }
+        showResult(data);
 
     }
-
 
     catch(error) {
 
-        cameraStatus.textContent =
+        console.error(error);
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
             error.message;
-
     }
-
 
     finally {
 
-        processing = false;
-
+        checking = false;
     }
-
 }
 
 
+/* =====================================================
+   SHOW RESULT
+===================================================== */
+
+function showResult(data) {
+
+    const decision =
+        document.getElementById(
+            "decision"
+        );
+
+    const expected =
+        data.expected || "";
+
+    const actual =
+        data.actual || "";
+
+
+    if (data.match) {
+
+        decision.className =
+            "decision correct";
+
+        decision.innerHTML =
+            "✓ CORRECT";
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
+            "Bucket matches: "
+            + actual;
+
+    }
+
+    else {
+
+        decision.className =
+            "decision rejected";
+
+        decision.innerHTML =
+            "✕ REJECTED";
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
+            "Expected: "
+            + expected
+            + " | Detected: "
+            + actual;
+    }
+
+
+    document.getElementById(
+        "score"
+    ).innerText =
+        data.score + "%";
+
+
+    document.getElementById(
+        "matches"
+    ).innerText =
+        data.good_matches;
+
+
+    document.getElementById(
+        "inliers"
+    ).innerText =
+        data.inliers;
+}
+
+
+/* =====================================================
+   WAITING
+===================================================== */
+
+function setWaiting() {
+
+    const decision =
+        document.getElementById(
+            "decision"
+        );
+
+    decision.className =
+        "decision waiting";
+
+    decision.innerHTML =
+        "WAITING";
+
+    document.getElementById(
+        "score"
+    ).innerText = "—";
+
+    document.getElementById(
+        "matches"
+    ).innerText = "—";
+
+    document.getElementById(
+        "inliers"
+    ).innerText = "—";
+}
+
+
+/* =====================================================
+   STOP CAMERA WHEN PAGE CLOSES
+===================================================== */
 
 window.addEventListener(
-    "pagehide",
+    "beforeunload",
     stopCamera
 );
 
-
 </script>
-
 
 </body>
 
