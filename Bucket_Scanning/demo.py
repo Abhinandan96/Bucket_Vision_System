@@ -1,12 +1,15 @@
 import os
 import base64
+import binascii
+
 import cv2
 import numpy as np
+
 from flask import Flask, request, jsonify, render_template
 
 
 # ============================================================
-# BASIC SETTINGS
+# SETTINGS
 # ============================================================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -23,16 +26,16 @@ app = Flask(__name__)
 
 
 # ============================================================
-# VISION SETUP
+# SIFT + MATCHER
 # ============================================================
 
-# SIFT detects visual features
 sift = cv2.SIFT_create(
     nfeatures=2000
 )
 
-# SIFT uses L2 distance
-matcher = cv2.BFMatcher(cv2.NORM_L2)
+matcher = cv2.BFMatcher(
+    cv2.NORM_L2
+)
 
 
 # ============================================================
@@ -56,7 +59,9 @@ def get_bucket_images():
 
     for filename in sorted(os.listdir(IMAGE_FOLDER)):
 
-        if filename.lower().endswith(SUPPORTED_EXTENSIONS):
+        if filename.lower().endswith(
+            SUPPORTED_EXTENSIONS
+        ):
 
             images.append({
                 "filename": filename,
@@ -68,18 +73,29 @@ def get_bucket_images():
 
 # ============================================================
 # CENTER CROP
-# Helps reduce background influence
 # ============================================================
 
 def center_crop(image, fraction=0.72):
 
     height, width = image.shape[:2]
 
-    crop_height = int(height * fraction)
-    crop_width = int(width * fraction)
+    crop_height = int(
+        height * fraction
+    )
 
-    y1 = max(0, (height - crop_height) // 2)
-    x1 = max(0, (width - crop_width) // 2)
+    crop_width = int(
+        width * fraction
+    )
+
+    y1 = max(
+        0,
+        (height - crop_height) // 2
+    )
+
+    x1 = max(
+        0,
+        (width - crop_width) // 2
+    )
 
     return image[
         y1:y1 + crop_height,
@@ -89,12 +105,14 @@ def center_crop(image, fraction=0.72):
 
 # ============================================================
 # COLOR HISTOGRAM
-# Used only as a supporting feature
 # ============================================================
 
 def color_histogram(image):
 
-    crop = center_crop(image, 0.72)
+    crop = center_crop(
+        image,
+        0.72
+    )
 
     hsv = cv2.cvtColor(
         crop,
@@ -123,9 +141,12 @@ def color_histogram(image):
 
 def prepare_reference(path):
 
-    image = cv2.imread(path)
+    image = cv2.imread(
+        path
+    )
 
     if image is None:
+
         return None
 
     gray = cv2.cvtColor(
@@ -139,9 +160,11 @@ def prepare_reference(path):
         0
     )
 
-    keypoints, descriptors = sift.detectAndCompute(
-        gray,
-        None
+    keypoints, descriptors = (
+        sift.detectAndCompute(
+            gray,
+            None
+        )
     )
 
     return {
@@ -153,20 +176,35 @@ def prepare_reference(path):
 
 
 # ============================================================
-# COMPARE CAMERA IMAGE WITH ONE REFERENCE
+# MATCH ONE REFERENCE AGAINST CAMERA IMAGE
 # ============================================================
 
-def match_reference(reference, camera_image):
+def match_reference(
+    reference,
+    camera_image
+):
 
-    if (
-        reference is None
-        or reference["descriptors"] is None
-    ):
-        return 0.0, 0, 0, 0.0
+    if reference is None:
 
-    # -------------------------------
-    # Camera image → grayscale
-    # -------------------------------
+        return (
+            0.0,
+            0,
+            0,
+            0.0
+        )
+
+    if reference["descriptors"] is None:
+
+        return (
+            0.0,
+            0,
+            0,
+            0.0
+        )
+
+    # --------------------------------------------------------
+    # CAMERA IMAGE → GRAYSCALE
+    # --------------------------------------------------------
 
     gray = cv2.cvtColor(
         camera_image,
@@ -186,36 +224,63 @@ def match_reference(reference, camera_image):
         )
     )
 
-    if (
-        descriptors_camera is None
-        or len(descriptors_camera) < 2
-    ):
-        return 0.0, 0, 0, 0.0
+    if descriptors_camera is None:
 
-    # -------------------------------
-    # Feature matching
-    # -------------------------------
+        return (
+            0.0,
+            0,
+            0,
+            0.0
+        )
 
-    matches = matcher.knnMatch(
-        reference["descriptors"],
-        descriptors_camera,
-        k=2
-    )
+    if len(descriptors_camera) < 2:
+
+        return (
+            0.0,
+            0,
+            0,
+            0.0
+        )
+
+    # --------------------------------------------------------
+    # KNN FEATURE MATCHING
+    # --------------------------------------------------------
+
+    try:
+
+        matches = matcher.knnMatch(
+            reference["descriptors"],
+            descriptors_camera,
+            k=2
+        )
+
+    except Exception:
+
+        return (
+            0.0,
+            0,
+            0,
+            0.0
+        )
 
     good_matches = []
 
-    # Stricter Lowe ratio than before
+    # Stricter Lowe ratio
     for pair in matches:
 
-        if len(pair) == 2:
+        if len(pair) != 2:
+            continue
 
-            m, n = pair
+        m, n = pair
 
-            if m.distance < 0.68 * n.distance:
+        if m.distance < 0.68 * n.distance:
 
-                good_matches.append(m)
+            good_matches.append(m)
 
-    # Not enough reliable features
+    # --------------------------------------------------------
+    # NOT ENOUGH MATCHES
+    # --------------------------------------------------------
+
     if len(good_matches) < 10:
 
         return (
@@ -225,26 +290,45 @@ def match_reference(reference, camera_image):
             0.0
         )
 
-    # -------------------------------
-    # Homography / RANSAC
-    # -------------------------------
+    # --------------------------------------------------------
+    # RANSAC HOMOGRAPHY
+    # --------------------------------------------------------
 
     source_points = np.float32([
-        reference["keypoints"][m.queryIdx].pt
+        reference["keypoints"][
+            m.queryIdx
+        ].pt
         for m in good_matches
-    ]).reshape(-1, 1, 2)
+    ]).reshape(
+        -1,
+        1,
+        2
+    )
 
     destination_points = np.float32([
-        keypoints_camera[m.trainIdx].pt
+        keypoints_camera[
+            m.trainIdx
+        ].pt
         for m in good_matches
-    ]).reshape(-1, 1, 2)
-
-    homography, mask = cv2.findHomography(
-        source_points,
-        destination_points,
-        cv2.RANSAC,
-        4.0
+    ]).reshape(
+        -1,
+        1,
+        2
     )
+
+    try:
+
+        homography, mask = cv2.findHomography(
+            source_points,
+            destination_points,
+            cv2.RANSAC,
+            4.0
+        )
+
+    except Exception:
+
+        homography = None
+        mask = None
 
     if mask is None:
 
@@ -252,54 +336,72 @@ def match_reference(reference, camera_image):
 
     else:
 
-        inliers = int(mask.sum())
+        inliers = int(
+            mask.sum()
+        )
 
-    # -------------------------------
-    # Geometry quality
-    # -------------------------------
+    # --------------------------------------------------------
+    # GEOMETRIC QUALITY
+    # --------------------------------------------------------
 
     geometry_ratio = (
-        inliers / max(len(good_matches), 1)
-    )
-
-    # -------------------------------
-    # Color similarity
-    # -------------------------------
-
-    camera_hist = color_histogram(
-        camera_image
-    )
-
-    color_correlation = cv2.compareHist(
-        reference["hist"],
-        camera_hist,
-        cv2.HISTCMP_CORREL
-    )
-
-    color_score = float(
-        np.clip(
-            (color_correlation + 1.0) * 50.0,
-            0.0,
-            100.0
+        inliers /
+        max(
+            len(good_matches),
+            1
         )
     )
 
-    # -------------------------------
-    # Feature score
-    # -------------------------------
+    # --------------------------------------------------------
+    # COLOR SIMILARITY
+    # --------------------------------------------------------
+
+    try:
+
+        camera_hist = color_histogram(
+            camera_image
+        )
+
+        color_correlation = cv2.compareHist(
+            reference["hist"],
+            camera_hist,
+            cv2.HISTCMP_CORREL
+        )
+
+        color_score = float(
+            np.clip(
+                (
+                    color_correlation
+                    + 1.0
+                )
+                * 50.0,
+                0.0,
+                100.0
+            )
+        )
+
+    except Exception:
+
+        color_score = 0.0
+
+    # --------------------------------------------------------
+    # FEATURE SCORE
+    # --------------------------------------------------------
 
     feature_score = min(
         100.0,
-        inliers * 4.0
-        + geometry_ratio * 50.0
+        (
+            inliers * 4.0
+            + geometry_ratio * 50.0
+        )
     )
 
-    # -------------------------------
-    # Final score
+    # --------------------------------------------------------
+    # FINAL SCORE
     #
     # Feature matching = 80%
-    # Color = 20%
-    # -------------------------------
+    # Color similarity = 20%
+    # --------------------------------------------------------
 
     total_score = (
         0.80 * feature_score
@@ -315,12 +417,13 @@ def match_reference(reference, camera_image):
 
 
 # ============================================================
-# LOAD ALL 14 PRODUCTS
+# LOAD ALL PRODUCT REFERENCE IMAGES
 # ============================================================
 
 BUCKET_IMAGES = get_bucket_images()
 
 REFERENCE_DATA = {}
+
 
 for item in BUCKET_IMAGES:
 
@@ -354,7 +457,134 @@ def index():
 
 
 # ============================================================
-# CAMERA CHECK
+# CAMERA IMAGE DECODER
+# ============================================================
+
+def decode_camera_image(frame_data):
+
+    if not frame_data:
+
+        return None
+
+    # --------------------------------------------------------
+    # Convert to string
+    # --------------------------------------------------------
+
+    frame_data = str(
+        frame_data
+    ).strip()
+
+    # --------------------------------------------------------
+    # Remove DATA URL prefix
+    #
+    # Example:
+    # data:image/jpeg;base64,/9j/4AAQ...
+    # --------------------------------------------------------
+
+    if "," in frame_data:
+
+        first_part, second_part = (
+            frame_data.split(
+                ",",
+                1
+            )
+        )
+
+        # If it looks like a data URL,
+        # use only the Base64 section.
+        if "base64" in first_part.lower():
+
+            frame_data = second_part
+
+    # --------------------------------------------------------
+    # Remove whitespace
+    # --------------------------------------------------------
+
+    frame_data = "".join(
+        frame_data.split()
+    )
+
+    if not frame_data:
+
+        return None
+
+    # --------------------------------------------------------
+    # Fix Base64 padding
+    # --------------------------------------------------------
+
+    remainder = len(frame_data) % 4
+
+    if remainder != 0:
+
+        frame_data += "=" * (
+            4 - remainder
+        )
+
+    # --------------------------------------------------------
+    # Decode Base64
+    # --------------------------------------------------------
+
+    try:
+
+        image_bytes = base64.b64decode(
+            frame_data,
+            validate=False
+        )
+
+    except (
+        ValueError,
+        binascii.Error,
+        TypeError
+    ):
+
+        # Try URL-safe Base64 as fallback
+        try:
+
+            image_bytes = base64.urlsafe_b64decode(
+                frame_data
+            )
+
+        except Exception:
+
+            return None
+
+    if not image_bytes:
+
+        return None
+
+    # --------------------------------------------------------
+    # Bytes → NumPy
+    # --------------------------------------------------------
+
+    image_array = np.frombuffer(
+        image_bytes,
+        dtype=np.uint8
+    )
+
+    if image_array.size == 0:
+
+        return None
+
+    # --------------------------------------------------------
+    # NumPy → OpenCV image
+    # --------------------------------------------------------
+
+    try:
+
+        camera_image = cv2.imdecode(
+            image_array,
+            cv2.IMREAD_COLOR
+        )
+
+    except Exception:
+
+        return None
+
+    return camera_image
+
+
+# ============================================================
+# CAMERA CHECK API
 # ============================================================
 
 @app.route(
@@ -363,19 +593,27 @@ def index():
 )
 def check():
 
+    # --------------------------------------------------------
+    # Get expected bucket
+    # --------------------------------------------------------
+
     expected = request.form.get(
         "expected",
         ""
-    )
+    ).strip()
+
+    # --------------------------------------------------------
+    # Get camera frame
+    # --------------------------------------------------------
 
     frame_data = request.form.get(
         "frame",
         ""
     )
 
-    # -------------------------------
+    # --------------------------------------------------------
     # Validate expected product
-    # -------------------------------
+    # --------------------------------------------------------
 
     if expected not in REFERENCE_DATA:
 
@@ -383,48 +621,21 @@ def check():
             "error": "Invalid expected bucket"
         }), 400
 
-    # -------------------------------
-    # Remove data URL header
-    # -------------------------------
-
-    if "," in frame_data:
-
-        frame_data = frame_data.split(
-            ",",
-            1
-        )[1]
-
-    # -------------------------------
+    # --------------------------------------------------------
     # Decode camera image
-    # -------------------------------
+    # --------------------------------------------------------
 
-    try:
+    camera_image = decode_camera_image(
+        frame_data
+    )
 
-        image_bytes = np.frombuffer(
-            base64.b64decode(frame_data),
-            dtype=np.uint8
-        )
-
-        camera_image = cv2.imdecode(
-            image_bytes,
-            cv2.IMREAD_COLOR
-        )
-
-    except Exception:
+    if camera_image is None:
 
         return jsonify({
             "error": "Could not decode camera image"
         }), 400
 
-    if camera_image is None:
-
-        return jsonify({
-            "error": "Invalid camera image"
-        }), 400
-
     # ========================================================
-    # IMPORTANT:
-    #
     # COMPARE CAMERA IMAGE WITH ALL PRODUCTS
     # ========================================================
 
@@ -432,7 +643,9 @@ def check():
 
     for item in BUCKET_IMAGES:
 
-        filename = item["filename"]
+        filename = item[
+            "filename"
+        ]
 
         if filename not in REFERENCE_DATA:
 
@@ -454,23 +667,24 @@ def check():
 
             "label": item["label"],
 
-            "score": score,
+            "score": float(score),
 
-            "good_matches": good_matches,
+            "good_matches": int(
+                good_matches
+            ),
 
-            "inliers": inliers,
+            "inliers": int(
+                inliers
+            ),
 
-            "color_score": color_score
+            "color_score": float(
+                color_score
+            )
         })
 
-    # -------------------------------
-    # Sort highest score first
-    # -------------------------------
-
-    results.sort(
-        key=lambda x: x["score"],
-        reverse=True
-    )
+    # --------------------------------------------------------
+    # No results
+    # --------------------------------------------------------
 
     if not results:
 
@@ -479,8 +693,13 @@ def check():
         }), 500
 
     # ========================================================
-    # BEST DETECTED PRODUCT
+    # SORT BY BEST MATCH
     # ========================================================
+
+    results.sort(
+        key=lambda x: x["score"],
+        reverse=True
+    )
 
     best = results[0]
 
@@ -492,7 +711,10 @@ def check():
 
         second = None
 
-    # Find the score of EXPECTED product
+    # ========================================================
+    # FIND EXPECTED PRODUCT RESULT
+    # ========================================================
+
     expected_result = next(
         (
             result
@@ -512,33 +734,42 @@ def check():
     # DECISION LOGIC
     # ========================================================
 
-    # The best product must have:
-    #
-    # 1. Enough overall score
-    # 2. Enough RANSAC inliers
-    # 3. A clear lead over second-best
-    # 4. MOST IMPORTANT:
-    #    best product MUST equal expected product
-    # ========================================================
+    # Condition 1:
+    # Best product must have enough quality.
 
     absolute_ok = (
         best["score"] >= 50
         and best["inliers"] >= 10
     )
 
-    margin_ok = (
-        second is None
-        or (
+    # Condition 2:
+    # Best product should clearly beat
+    # the second-best product.
+
+    if second is None:
+
+        margin_ok = True
+
+    else:
+
+        margin_ok = (
             best["score"]
             - second["score"]
             >= 12
         )
-    )
+
+    # Condition 3:
+    # MOST IMPORTANT:
+    #
+    # The BEST CLASSIFIED PRODUCT must
+    # be the same as the EXPECTED PRODUCT.
 
     expected_is_best = (
         best["filename"]
         == expected
     )
+
+    # Final decision
 
     is_match = (
         absolute_ok
@@ -547,19 +778,21 @@ def check():
     )
 
     # ========================================================
-    # FINAL RESPONSE
+    # MESSAGE
     # ========================================================
 
     if is_match:
+
+        decision = "CORRECT"
 
         message = (
             f"Bucket matches: "
             f"{best['label']}"
         )
 
-        decision = "CORRECT"
-
     else:
+
+        decision = "REJECTED"
 
         message = (
             f"Wrong bucket. "
@@ -569,7 +802,9 @@ def check():
             f"{best['label']}"
         )
 
-        decision = "REJECTED"
+    # ========================================================
+    # RESPONSE
+    # ========================================================
 
     return jsonify({
 
@@ -585,7 +820,7 @@ def check():
 
         "decision": decision,
 
-        # Score belonging to EXPECTED product
+        # Score for EXPECTED PRODUCT
         "score": round(
             expected_result["score"],
             1
@@ -603,12 +838,13 @@ def check():
             ]
         ),
 
-        # Useful for debugging
+        # Best classified product score
         "best_score": round(
             best["score"],
             1
         ),
 
+        # Second-best product score
         "second_score": round(
             second["score"],
             1
@@ -629,7 +865,7 @@ def health():
 
 
 # ============================================================
-# LOCAL RUN
+# LOCAL DEVELOPMENT
 # ============================================================
 
 if __name__ == "__main__":
